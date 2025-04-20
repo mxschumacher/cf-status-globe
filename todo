@@ -1,0 +1,3 @@
+introduce ESLint
+
+I'd like to be able to run tests without calling external services, we should mock those services.

@@ -7,21 +7,33 @@
 	"name": "globe-cf-status",
 	"main": "src/index.js",
 	"compatibility_date": "2025-04-13",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
 		"binding": "ASSETS",
-		"directory": "./public"
+		"directory": "./public",
 	},
 	"observability": {
-		"enabled": true
-	}
+		"enabled": true,
+		"head_sampling_rate": 0.1 // 10% of incoming requests are sampled: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#head-based-sampling
+	},
+	"routes": [
+    {
+    "pattern": "cf-status-globe.mxschumacher.xyz",
+    "custom_domain": true
+    }
+  ],
+	"workers_dev": false,
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 	 */
-	// "placement": { "mode": "smart" },
+	"placement": { "mode": "smart" },
+	"kv_namespaces": [
+    {
+      "binding": "cf_pop_status",
+      "id": "cb0ff638fcb7484aa24f99ba4cbbd26f"
+    }
+  ]
 
 	/**
 	 * Bindings
@@ -39,12 +51,6 @@
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
-
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": { "directory": "./public/", "binding": "ASSETS" },
 
 	/**
 	 * Service Bindings (communicate between multiple Workers)

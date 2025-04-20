@@ -2,6 +2,16 @@
 
 A visualization of Cloudflare's status page on a draggable globe
 
+The project is deployed [here](https://cf-status-globe.mxschumacher.xyz)
+
+This site is hosted on Cloudflare and as such would not be available in the case that CF itself is unavailable. Not ideal for a status page.
+
+ * - Run `pnpm run dev` in your terminal to start a development server
+ * - Open a browser tab at http://localhost:8787/ to see your worker in action
+
+ to create the KV namespace, I ran:
+ > npx wrangler kv namespace create cf-pop-status
+
 Use the pnpm package manager.
 
 Taking the information from https://www.cloudflarestatus.com/api to create a visualization on a webgl-rendered globe
@@ -22,7 +32,5 @@ Some kind of web analytics to see how many people access the site.
 When clicking on a pop, it should provide more information on the incident.
 
 Some incidents are not pop-specific, how should I deal with those?
-
-I currently cannot launch Chrome, so I will reboot my machine.
 
 Deployment funnel is no longer wrangler deploy, but pushing to github.
