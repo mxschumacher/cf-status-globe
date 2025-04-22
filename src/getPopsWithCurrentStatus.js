@@ -1,22 +1,17 @@
-// the JSON file could change at any moment, but I cannot listen to changes, I have to poll the site.
-// I can expose an endpoint that I trigger with cron to make a call every 5 minutes to see whether there was a change
-// https://developers.cloudflare.com/workers/configuration/cron-triggers/
-// poll every few minutes and then update a KV store.
-
 export async function getPopsWithStatus(request, env, ctx) {
-	// before calling the API, let's do a KV lookup and see whether we have an entry that's less than 5 minutes old.
+	const latest_pop_status = await env.cf_pop_status.get(env.cf_status_cache_key_for_kv, { type: 'json' });
 
-	const EXPIRATION_TTL = 60; // Cache expiration in seconds => let's turn this into an environment variable
-	// Try to get data from KV cache first
-	const cacheKey = "latest_status"
-	let data = await env.cf_pop_status.get(cacheKey, { type: 'json' });
-
-	if (!data) {
+	if (latest_pop_status) {
+		return latest_pop_status;
+	} else {
 		console.log('Could not fetch the status from cache, so we will retrieve it from the API.');
-		// this endpoint might be unavailabe or slow.
-		// We need a retry mechanism
-		// We need a fallback mechanism. Store the most recent result on KV?
-		const apiUrl = 'https://www.cloudflarestatus.com/api/v2/components.json';
+
+		// any endpoint might be unavailabe or slow.
+		// We need a retry mechanism, https://www.npmjs.com/package/fetch-retry ?
+		const apiUrl = env.cf_status_api_endpoint;
+		if (apiUrl === undefined) {
+			throw new Error("The value of the environment variable 'cf_status_api_endpoint' is undefined")
+		}
 
 		try {
 			const response = await fetch(apiUrl);
@@ -41,10 +36,11 @@ export async function getPopsWithStatus(request, env, ctx) {
 						updated_at: component.updated_at,
 					};
 				});
-
+			console.log("Caching the result from the API call in KV for future reference")
+			// can I somehow return 'filteredPops' before having to wait for the write to KV to complete?
+			// Yes you can: https://developers.cloudflare.com/workers/runtime-apis/context/#waituntil
 			// The expirationTtl option is used to set the expiration time for the cache entry (in seconds), otherwise it will be stored indefinitely
-			await env.cf_pop_status.put(cacheKey, JSON.stringify(filteredPops), { expirationTtl: EXPIRATION_TTL });
-
+			ctx.waitUntil(env.cf_pop_status.put(env.cf_status_cache_key_for_kv, JSON.stringify(filteredPops), { expirationTtl: env.cf_status_cache_ttl_in_seconds }));
 			return filteredPops;
 		} catch (error) {
 			console.error('There was a problem with the fetch operation:', error);

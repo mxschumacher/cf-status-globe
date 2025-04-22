@@ -1,3 +1,20 @@
+We have two filtered lists, the status by pop and the coordinates by pop, now we want to combine them. We join on iata (the airport code)
+
+Yaak? Postman? I need a solid tool here, Yaak has been a disappointment.
+
+set up HURL for API tests: https://hurl.dev
+
+for testing of the endpoints, I need to delete the values in KV, I can make a call with wrangler to achieve this.
+=> First call, you get the response from the API which is then put in cache for a period of time
+=> if the second call appears before cache expiration, then you are served from cache
+--> I don't want to have to wait until Cache expiration, I want to delete the value in KV
+
+Mock the locations service from CF; build tests around them
+
+Mock the status service from CF; build tests around them
+
 introduce ESLint
 
-I'd like to be able to run tests without calling external services, we should mock those services.
+introduce Typescript
+
+control API schemas with Zod

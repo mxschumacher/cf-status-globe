@@ -32,9 +32,17 @@
     {
       "binding": "cf_pop_status",
       "id": "cb0ff638fcb7484aa24f99ba4cbbd26f"
+    },
+    {
+      "binding": "cf_pop_coordinates",
+      "id": "29c3277806ec429babd62633d59197e5"
     }
-  ]
-
+  ],
+  "vars": {
+      "cf_status_api_endpoint": "https://www.cloudflarestatus.com/api/v2/components.json",
+      "cf_status_cache_ttl_in_seconds" : 60,
+      "cf_status_cache_key_for_kv": "latest_status"
+  }
 	/**
 	 * Bindings
 	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including

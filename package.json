@@ -4,12 +4,15 @@
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
+		"dev": "vite dev",
+		"build": "vite build",
 		"start": "wrangler dev",
-		"test": "vitest"
+		"test": "pnpm exec vitest"
 	},
 	"devDependencies": {
+		"@cloudflare/vite-plugin": "^1.0.8",
 		"@cloudflare/vitest-pool-workers": "^0.7.8",
+		"vite": "^6.3.2",
 		"vitest": "~3.0.9",
 		"wrangler": "^4.12.0"
 	}
