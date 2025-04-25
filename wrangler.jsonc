@@ -36,7 +36,11 @@
     {
       "binding": "cf_pop_coordinates",
       "id": "29c3277806ec429babd62633d59197e5"
-    }
+    },
+	{
+	  "binding": "pop_status_and_coordinates",
+	  "id": "24e0e8c6b1f54eab9c645c53e43920b3"
+	}
   ],
   "vars": {
       "cf_status_api_endpoint": "https://www.cloudflarestatus.com/api/v2/components.json",

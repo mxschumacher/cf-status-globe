@@ -9,6 +9,10 @@ This site is hosted on Cloudflare and as such would not be available in the case
  * - Run `pnpm run dev` in your terminal to start a development server
  * - Open a browser tab at http://localhost:8787/ to see your worker in action
 
+ # API client interaction
+
+ We have client code in Hoppscotch ( https://hoppscotch.io/ ) and Hurl ( https://hurl.dev/ ) in the api-clients folder
+
  to create the KV namespace, I ran:
  > npx wrangler kv namespace create cf-pop-status
 

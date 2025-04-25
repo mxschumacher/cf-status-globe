@@ -32,6 +32,19 @@ function errorResponse(message, statusCode) {
 }
 
 async function getPopsWithCoordinatesAndStatus(request, env, ctx) {
+
+	// We will also make use of KV storage to cache the results of the API calls
+
+	const EXPIRATION_TTL = 60; // Cache expiration in seconds => let's turn this into an environment variable
+	// before calling the API, let's do a KV lookup and see whether we have an entry that's less than 5 minutes old.
+	const cacheKey = 'pop_status_and_coordinates';
+	let data = await env.cf_pop_coordinates.get(cacheKey, { type: 'json' });
+
+	if (data) {
+		return data;
+	} else {
+		console.log('Could not fetch the pop_status_and_coordinates from cache, so we will retrieve it from the API.');
+
 	const [popsWithStatus, popCoordinates] = await Promise.all([getPopsWithStatus(request, env, ctx), getPopCoordinates(request, env, ctx)]);
 
 	if (popsWithStatus === 'undefined' || popCoordinates === 'undefined') {
@@ -59,7 +72,11 @@ async function getPopsWithCoordinatesAndStatus(request, env, ctx) {
 		return Object.assign(p, { lat: matchedPop.lat, lon: matchedPop.lon });
 	});
 
+	// The expirationTtl option is used to set the expiration time for the cache entry (in seconds), otherwise it will be stored indefinitely
+	await ctx.waitUntil(env.cf_pop_coordinates.put(cacheKey, JSON.stringify(statusAndCoordinates), { expirationTtl: EXPIRATION_TTL }));
+
 	return statusAndCoordinates;
+}
 }
 
 // i'd like to set up a unit test for this function, it's perfectly pure
