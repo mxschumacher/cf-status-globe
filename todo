@@ -1,6 +1,39 @@
-check that the globe also looks good on mobile
+The initial load takes too long
+* not network related as far as I can tell, so the threejs initialization is slow
 
-We have no location data for the Chinese pops
+Find a high resolution image for the globe surface, when you zoom in, it's clear that the quality is insufficient
+
+trackball controls are not ideal, very easy for the globe to tilt, how can I configure these?
+
+We have no location data for the Chinese pops from the API I'm using, I have to get it from a geo-mapping service somehwere
+=> Can hardcode it at the start, these things don't change often.
+
+label text color should be white
+=> Will I have to generate a second globe? I don't see a way to define differnet colors for the dot and the label of the dot
+
+Special characters are not displayed correctly (Muenchen, Zuerich etc)
+
+Add a legend to explain the color coding
+
+Can we make the dots clickable to retrieve more information?
+
+Can we use Radar data to make this more interesting? https://developers.cloudflare.com/api/resources/radar/
+
+If there's re-routing from one PoP to another, can we show that?
+=> use arcs: https://github.com/vasturiano/globe.gl?tab=readme-ov-file#arcs-layer
+
+check that the globe also looks good on mobile
+=> make it mobile friendly
+
+---
+
+Lots of javascript is being downloaded, is this all needed?
+
+Add some basic website tracking
+
+get a review from Claude Code
+
+introduce hono for the API
 
 set up HURL for API tests: https://hurl.dev
 

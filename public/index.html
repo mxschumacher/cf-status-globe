@@ -1,42 +1,139 @@
-<!doctype html>
-<html lang="en">
-
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<link rel="stylesheet" href="css/main.css">
-	<title>Hello, World!</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/main.css">
+    <title>Cf-Status Globe Globe</title>
+    <script type="importmap">{ "imports": {
+      "three": "https://esm.sh/three",
+      "three/": "https://esm.sh/three/"
+    }}</script>
 </head>
 
 <body>
 
-	<h2>
-		Hello from the public/index.html file. This is served via <a
-			href="https://developers.cloudflare.com/workers/static-assets/">Workers Static assets</a>
-	</h2>
+    <div class="navbar">
+        <a href="about.html" ">About</a>
+        <a href="https://github.com/mxschumacher/cf-status-globe" target="_blank">GitHub</a>
+    </div>
 
-	<div class="container">
-		<h1>API Endpoints</h1>
-		<ul>
-			<li><a href="/api/pops_with_status" target="_blank">/api/pops_with_status</a></li>
-			<li><a href="/api/pops_with_coordinates" target="_blank">/api/pops_with_coordinates</a></li>
-			<li><a href="/api/pops_with_coordinates_and_status"
-					target="_blank">/api/pops_with_coordinates_and_status</a></li>
-		</ul>
-	</div>
+    <div id="globeViz"></div>
 
-	<script>
-		// we can use inline javascript, but we can also import scripts.
-		console.log("hello world");
+    <script type="module">
+        import ThreeGlobe from 'https://esm.sh/three-globe?external=three';
+        import * as THREE from 'https://esm.sh/three';
+        import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js?external=three';
 
-		const myGlobe = new ThreeGlobe()
-			.globeImageUrl(myImageUrl)
-			.pointsData(myData);
+        let apiData = [];
 
-		const myScene = new THREE.Scene();
-		myScene.add(myGlobe);
-	</script>
-	<script src="//cdn.jsdelivr.net/npm/three-globe"></script>
+        function statusToColorMapper(status) {
+            // what are the possible values for status?
+            switch (status) {
+                case 'operational':
+                    return 'green';
+                case 'partial_outage':
+                    return 'orange';
+                case 'under_maintenance':
+                    return 'red';
+                default:
+                    return 'gray';
+            }
+        }
+
+        async function fetchApiData() {
+            const apiUrl = '/api/pops_with_coordinates_and_status';
+
+            /*
+            Example of the API response we will get:
+
+             {
+                "id": "57ctn3f2qsyj",
+                "name": "Amsterdam, Netherlands - (AMS)",
+                "status": "operational",
+                "updated_at": "2025-03-03T18:19:46.395Z",
+                "lat": 52.3086013794,
+                "lon": 4.7638897896,
+                }
+            */
+
+            try {
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                apiData = await response.json();
+
+                // Map the API data to the format expected by ThreeGlobe
+                apiData.map(item => {
+                    item.lng = item.lon;
+                    delete item.lon;
+                    item.color = statusToColorMapper(item.status);
+                    item.size = 1; // default size, you can adjust this based on your needs
+                    return item;
+                })
+
+                // Display the data on the page
+                const globe = await generateGlobe(apiData);
+                await renderGlobe(globe);
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        }
+
+        // Fetch API data on page load
+        window.addEventListener('load', fetchApiData);
+
+        async function generateGlobe(data) {
+
+            const Globe = new ThreeGlobe()
+                .globeImageUrl('../images/earth-blue-marble.jpg')
+                .labelsData(data) // not clear to me which format is expected, the docs don't say
+                .labelText(d => `${d.name}`)
+                .labelSize(0.15)
+                .labelDotRadius(d => 0.25)
+                .labelColor(d => d.color);
+            return Globe;
+        }
+
+        async function renderGlobe(Globe) {
+
+            // Setup renderer
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            const globeViz = document.getElementById('globeViz');
+            if (!globeViz) {
+                throw new Error('Element with id "globeViz" not found');
+            }
+            
+            globeViz.appendChild(renderer.domElement);
+
+            // Setup scene
+            const scene = new THREE.Scene();
+            scene.add(Globe);
+            scene.add(new THREE.AmbientLight(0xcccccc, Math.PI));
+            scene.add(new THREE.DirectionalLight(0xffffff, 0.6 * Math.PI));
+
+            // Setup camera
+            const camera = new THREE.PerspectiveCamera();
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            camera.position.z = 500;
+
+            // Add camera controls
+            const tbControls = new TrackballControls(camera, renderer.domElement);
+            tbControls.minDistance = 101;
+            tbControls.rotateSpeed = 5;
+            tbControls.zoomSpeed = 0.8;
+
+            // Kick-off renderer
+            (function animate() { // IIFE, this is a self-invoking function
+                // Frame cycle
+                tbControls.update();
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            })();
+        }
+    </script>
 </body>
-
-</html>

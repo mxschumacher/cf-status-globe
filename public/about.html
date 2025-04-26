@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="css/main.css">
+	<title>Hello, World!</title>
+</head>
+
+<body>
+
+	<h2>
+		Hello from the public/index.html file. This is served via <a
+			href="https://developers.cloudflare.com/workers/static-assets/">Workers Static assets</a>
+	</h2>
+
+	<div class="container">
+		<h1>API Endpoints</h1>
+		<ul>
+			<li><a href="/api/pops_with_status" target="_blank">/api/pops_with_status</a></li>
+			<li><a href="/api/pops_with_coordinates" target="_blank">/api/pops_with_coordinates</a></li>
+			<li><a href="/api/pops_with_coordinates_and_status"
+					target="_blank">/api/pops_with_coordinates_and_status</a></li>
+		</ul>
+	</div>
+
+	<script>
+		// we can use inline javascript, but we can also import scripts.
+		console.log("hello world");
+
+		const myGlobe = new ThreeGlobe()
+			.globeImageUrl(myImageUrl)
+			.pointsData(myData);
+
+		const myScene = new THREE.Scene();
+		myScene.add(myGlobe);
+	</script>
+	<script src="//cdn.jsdelivr.net/npm/three-globe"></script>
+</body>
+
+</html>
