@@ -25,16 +25,8 @@ Taking geographical information about Pops from https://speed.cloudflare.com/loc
 Outgoing gateway Worker to get the status in the format we want (if the API is down, return data from storage (most recent successful request))
 -> for both endpoints
 
-I have found a webgl based library that can be reused, surely there are also other packages that would look good.
-
-The frontend will be delivered as a workers static asset (js, html, css)
-
-about page saying that this is not a CF project
-
 Some kind of web analytics to see how many people access the site.
 
 When clicking on a pop, it should provide more information on the incident.
 
 Some incidents are not pop-specific, how should I deal with those?
-
-Deployment funnel is no longer wrangler deploy, but pushing to github.

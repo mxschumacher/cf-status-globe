@@ -35,38 +35,38 @@ async function getPopsWithCoordinatesAndStatus(request, env, ctx) {
 	} else {
 		console.log('Could not fetch the pop_status_and_coordinates from cache, so we will retrieve it from the API.');
 
-	const [popsWithStatus, popCoordinates] = await Promise.all([getPopsWithStatus(request, env, ctx), getPopCoordinates(request, env, ctx)]);
+		const [popsWithStatus, popCoordinates] = await Promise.all([getPopsWithStatus(request, env, ctx), getPopCoordinates(request, env, ctx)]);
 
-	if (popsWithStatus === 'undefined' || popCoordinates === 'undefined') {
-		console.error('getPopsWithCoordinatesAndStatus: Failed to retrieve the pop data');
-		return;
+		if (popsWithStatus === 'undefined' || popCoordinates === 'undefined') {
+			console.error('getPopsWithCoordinatesAndStatus: Failed to retrieve the pop data');
+			return;
+		}
+
+		const statusAndCoordinates = popsWithStatus.map((p) => {
+			const iata = extractIATACodeFromName(p.name);
+			if (typeof iata !== 'string' && iata.length !== 3) {
+				console.error('A three letter IATA code is expected');
+				return {};
+			}
+			// go into the second array and fetch the object that has the iata code we extracted from the first array
+			const matchedPop = popCoordinates.find((el) => (el.iata == iata));
+			// now we merge the two objects
+			if (matchedPop === undefined) {
+				console.error(`getPopsWithCoordinatesAndStatus: No coordinates found for IATA code ${iata}`);
+				return p;
+			}
+			if (matchedPop.lat === undefined || matchedPop.lon === undefined) {
+				console.error(`getPopsWithCoordinatesAndStatus: No coordinates found for IATA code ${iata}`);
+				return p;
+			}
+			return Object.assign(p, { lat: matchedPop.lat, lon: matchedPop.lon });
+		});
+
+		// The expirationTtl option is used to set the expiration time for the cache entry (in seconds), otherwise it will be stored indefinitely
+		await ctx.waitUntil(env.cf_pop_coordinates.put(cacheKey, JSON.stringify(statusAndCoordinates), { expirationTtl: EXPIRATION_TTL }));
+
+		return statusAndCoordinates;
 	}
-
-	const statusAndCoordinates = popsWithStatus.map((p) => {
-		const iata = extractIATACodeFromName(p.name);
-		if (typeof iata !== 'string' && iata.length !== 3) {
-			console.error('A three letter IATA code is expected');
-			return {};
-		}
-		// go into the second array and fetch the object that has the iata code we extracted from the first array
-		const matchedPop = popCoordinates.find((el) => (el.iata == iata));
-		// now we merge the two objects
-		if (matchedPop === undefined) {
-			console.error(`getPopsWithCoordinatesAndStatus: No coordinates found for IATA code ${iata}`);
-			return p;
-		}
-		if (matchedPop.lat === undefined || matchedPop.lon === undefined) {
-			console.error(`getPopsWithCoordinatesAndStatus: No coordinates found for IATA code ${iata}`);
-			return p;
-		}
-		return Object.assign(p, { lat: matchedPop.lat, lon: matchedPop.lon });
-	});
-
-	// The expirationTtl option is used to set the expiration time for the cache entry (in seconds), otherwise it will be stored indefinitely
-	await ctx.waitUntil(env.cf_pop_coordinates.put(cacheKey, JSON.stringify(statusAndCoordinates), { expirationTtl: EXPIRATION_TTL }));
-
-	return statusAndCoordinates;
-}
 }
 
 // i'd like to set up a unit test for this function, it's perfectly pure
@@ -98,6 +98,6 @@ const ENV = 'development';
 export const __private =
 	ENV === 'development'
 		? {
-				extractIATACodeFromName,
-			}
+			extractIATACodeFromName,
+		}
 		: undefined;

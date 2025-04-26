@@ -2,11 +2,14 @@
 
 /* Set a light orange background */
 body {
-    background-color: #FFD580; /* Light orange color */
+    background-color: #fc830b;
+    /* Light orange color */
     margin: 0;
     padding: 0;
-    font-family: 'Helvetica Neue', Arial, sans-serif; /* Modern font */
-    color: #333; /* Dark gray text color */
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    /* Modern font */
+    color: #333;
+    /* Dark gray text color */
 }
 
 /* Container for centering content */
@@ -18,7 +21,8 @@ body {
 
 /* Header styling */
 header {
-    background-color: #FFA07A; /* Darker orange for header */
+    background-color: #FFA07A;
+    /* Darker orange for header */
     padding: 10px 0;
     text-align: center;
 }
@@ -35,7 +39,8 @@ main {
 }
 
 main h2 {
-    color: #FF4500; /* Dark orange for headings */
+    color: #FF4500;
+    /* Dark orange for headings */
 }
 
 main p {
@@ -45,7 +50,8 @@ main p {
 
 /* Footer styling */
 footer {
-    background-color: #FFA07A; /* Darker orange for footer */
+    background-color: #FFA07A;
+    /* Darker orange for footer */
     padding: 10px 0;
     text-align: center;
     color: white;

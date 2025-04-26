@@ -1,5 +1,6 @@
 The initial load takes too long
 * not network related as far as I can tell, so the threejs initialization is slow
+* can I pre-render everything on the server?
 
 Find a high resolution image for the globe surface, when you zoom in, it's clear that the quality is insufficient
 
