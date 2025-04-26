@@ -24,6 +24,20 @@
 
         let apiData = [];
 
+        function statusToColorMapper(status) {
+            // what are the possible values for status?
+            switch (status) {
+                case 'operational':
+                    return 'green';
+                case 'partial_outage':
+                    return 'orange';
+                case 'under_maintenance':
+                    return 'red';
+                default:
+                    return 'gray';
+            }
+        }
+
         async function fetchApiData() {
             const apiUrl = '/api/pops_with_coordinates_and_status';
 
@@ -48,11 +62,19 @@
                 }
 
                 apiData = await response.json();
-                console.log(apiData);
+
+                // Map the API data to the format expected by ThreeGlobe
+                apiData.map(item => {
+                    item.lng = item.lon;
+                    delete item.lon;
+                    item.color = statusToColorMapper(item.status);
+                    item.size = 1; // default size, you can adjust this based on your needs
+                    return item;
+                })
 
                 // Display the data on the page
                 const globe = await generateGlobe(apiData);
-                await renderGlobe();
+                await renderGlobe(globe);
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
             }
@@ -63,23 +85,38 @@
 
         async function generateGlobe(data) {
 
+            /*
+            // let's download the two images concurrently
+            // we could even do this in parallel with the fetchApiData call
+            const [globeImage, bumpImage] = await Promise.all([
+                fetch('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg').then(res => res.blob()),
+                fetch('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png').then(res => res.blob())
+            ]);
+            */
+
             const Globe = new ThreeGlobe()
-                .globeImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg')
+                .globeImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg')
                 .bumpImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png')
-                .labelsData(data)
-                .labelText(d => `(${Math.round(d.lat * 1e2) / 1e2}, ${Math.round(d.lng * 1e2) / 1e2})`)
-                .labelSize('size')
-                .labelDotRadius(d => 1)
-                .labelColor('green'); // here we have to do the mapping between the status and the color
+                .labelsData(data) // not clear to me which format is expected, the docs don't say
+                .labelText(d => `${d.name}`) // d.name is the name of the city, d.status is the status
+                .labelSize(0.15)
+                .labelDotRadius(d => 0.25)
+                .labelColor(d => d.color); // todo: here we have to do the mapping between the status and the color
+            return Globe;
         }
 
-        async function renderGlobe() {
+        async function renderGlobe(Globe) {
 
             // Setup renderer
             const renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            document.getElementById('globeViz').appendChild(renderer.domElement);
+            const globeViz = document.getElementById('globeViz');
+            if (!globeViz) {
+                throw new Error('Element with id "globeViz" not found');
+            }
+            
+            globeViz.appendChild(renderer.domElement);
 
             // Setup scene
             const scene = new THREE.Scene();
@@ -100,7 +137,7 @@
             tbControls.zoomSpeed = 0.8;
 
             // Kick-off renderer
-            (function animate() { // IIFE
+            (function animate() { // IIFE, this is a self-invoking function
                 // Frame cycle
                 tbControls.update();
                 renderer.render(scene, camera);

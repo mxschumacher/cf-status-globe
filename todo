@@ -1,6 +1,6 @@
-We have two filtered lists, the status by pop and the coordinates by pop, now we want to combine them. We join on iata (the airport code)
+check that the globe also looks good on mobile
 
-Yaak? Postman? I need a solid tool here, Yaak has been a disappointment.
+We have no location data for the Chinese pops
 
 set up HURL for API tests: https://hurl.dev
 
@@ -18,3 +18,5 @@ introduce ESLint
 introduce Typescript
 
 control API schemas with Zod
+-> First for the responses from the APIs we talk to
+-> second for the API that we ourselves are exposing
